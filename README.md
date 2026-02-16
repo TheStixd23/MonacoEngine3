@@ -1,73 +1,159 @@
-# 🛠️ MonacoEngine3 — Motor Gráfico DirectX 11
+# 🛠️ MonacoEngine3 — Motor Gráfico DirectX 11 (Framework ECS)
 
-## 📋 Descripción
+## 📋 Resumen
 
-**MonacoEngine3** es un motor gráfico avanzado desarrollado en C++ y **DirectX 11**. A diferencia de sus versiones anteriores, esta iteración presenta una arquitectura robusta basada en componentes (**ECS**), un grafo de escena jerárquico (**Scene Graph**) y un editor visual integrado (**GUI**) para la manipulación de escenas en tiempo real.
+`MonacoEngine3` es una evolución integral hacia un motor gráfico profesional basado en **DirectX 11** y C++. A diferencia de sus versiones iniciales, esta iteración abandona la lógica centralizada para implementar una arquitectura modular basada en **Entidades y Componentes (ECS)** y un **Grafo de Escena (Scene Graph)** jerárquico.
 
-El motor está diseñado con un enfoque modular, encapsulando la API de DirectX en clases de alto nivel para facilitar la gestión de recursos, el renderizado y la lógica de juego.
+El motor permite la carga de modelos complejos mediante el **FBX SDK**, gestión automatizada de recursos a través de un **ResourceManager** y una interfaz de edición en tiempo real impulsada por **Dear ImGui** y **ImGuizmo**.
 
-## ✨ Características Principales
+## 📌 Índice
 
-### 🖥️ Motor Gráfico (DirectX 11)
+  - [Resumen](#-resumen)
+  - [Objetivos del motor](#-objetivos-del-motor)
+  - [Arquitectura del Sistema (ECS & Scene Graph)](#-arquitectura-del-sistema-ecs--scene-graph)
+      - [Componentes principales](#componentes-principales)
+      - [Jerarquía y Propagación](#jerarquía-y-propagación)
+  - [Pipeline Gráfico y Recursos](#-pipeline-gráfico-y-recursos)
+  - [Flujo de Ejecución (Ciclo de Vida)](#-flujo-de-ejecución-ciclo-de-vida)
+  - [Herramientas del Editor (GUI)](#-herramientas-del-editor-gui)
+  - [Diagrama UML](#-diagrama-uml)
 
-* **Pipeline Modular:** Abstracción completa de la API mediante clases wrapper (`Device`, `DeviceContext`, `SwapChain`, `RenderTargetView`, `DepthStencilView`).
-* **Shaders HLSL:** Sistema de gestión de `ShaderProgram` para compilación y enlace de Vertex y Pixel Shaders.
-* **Buffers Eficientes:** Manejo automatizado de Vertex Buffers, Index Buffers y Constant Buffers (`Buffer`).
-* **Texturizado:** Soporte para texturas 2D y Cubemaps para Skyboxes.
+-----
 
-### 🧱 Arquitectura de Entidades (ECS & Scene Graph)
+## 🎯 Objetivos del motor
 
-* **Entity-Component-System:** Estructura flexible donde los `Actor` son contenedores de componentes (`Transform`, `MeshComponent`, `HierarchyComponent`).
-* **Grafo de Escena (Scene Graph):** Sistema jerárquico completo que permite relaciones Padre-Hijo. Las transformaciones (posición, rotación, escala) se propagan correctamente a través de la jerarquía.
-* **Transformaciones:** Cálculos matriciales precisos (SRT) con orden de rotación controlado para evitar Gimbal Lock visual.
+| Objetivo | Descripción |
+|---|---|
+| **Arquitectura ECS** | Separación de datos y lógica mediante Entidades (`Actor`) y Componentes (`Transform`, `Mesh`, etc.). |
+| **Scene Graph** | Implementación de jerarquías Padre-Hijo con propagación de matrices de transformación (SRT). |
+| **Carga de Activos** | Importación de modelos `.fbx` y `.obj` utilizando el SDK de Autodesk FBX. |
+| **Editor Visual** | Interfaz de usuario para manipulación de transformaciones, inspección de variables y jerarquía. |
+| **Gestión Flyweight** | Uso de un `ResourceManager` para evitar la duplicación de texturas y mallas en memoria. |
 
-### 📦 Gestión de Recursos (Assets)
+-----
 
-* **Resource Manager Centralizado:** Singleton (`ResourceManager`) que implementa el patrón **Flyweight** para evitar la duplicación de datos en memoria.
-* **Carga de Modelos 3D:** Integración con **Autodesk FBX SDK** para importar modelos complejos (`.fbx`, `.obj`) incluyendo mallas y materiales.
-* **Ciclo de Vida:** Estados de carga gestionados (`Unloaded`, `Loading`, `Loaded`, `Failed`).
+## 🏗 Arquitectura del Sistema (ECS & Scene Graph)
 
-### 🎨 Editor Integrado (GUI)
+### Componentes principales
 
-* **Interfaz ImGui Personalizada:** Estilo visual "Monaco Dark" profesional.
-* **Inspector de Propiedades:** Visualización y edición en tiempo real de componentes (Transform, Tag, Layer).
-* **Outliner (Jerarquía):** Vista de árbol para seleccionar y organizar actores en la escena.
-* **Gizmos 3D:** Integración de **ImGuizmo** para manipular objetos (Traslación, Rotación, Escala) directamente en el Viewport.
-* **Cámara de Editor:** Cámara tipo "LookAt" y FPS con movimiento libre.
+| Clase | Responsabilidad | Relación |
+|---|---|---|
+| **`BaseApp`** | Orquestador principal. Maneja el bucle de mensajes y los subsistemas DX11. | Posee `SceneGraph`, `GUI` y `Camera`. |
+| **`Actor`** | Especialización de `Entity`. Es el contenedor de objetos en el mundo. | Hereda de `Entity`, contiene `Components`. |
+| **`Transform`** | Gestiona Posición, Rotación y Escala. Calcula la matriz de mundo local. | Componente obligatorio por `Actor`. |
+| **`HierarchyComponent`** | Almacena punteros a padres e hijos dentro del grafo. | Define la estructura del árbol en el `SceneGraph`. |
+| **`MeshComponent`** | Contenedor de geometría (vértices e índices) cargados desde disco. | Alimenta a la clase `Buffer` para crear VBO/IBO. |
+| **`SceneGraph`** | Sistema que recorre la jerarquía y actualiza las matrices globales. | Realiza el `updateWorldRecursive`. |
 
-## 🏛️ Arquitectura del Software
+### Jerarquía y Propagación
 
-El motor sigue un flujo de ejecución gestionado por la clase `BaseApp`, que controla el bucle principal de Windows:
+1. El `SceneGraph` inicia el recorrido desde los nodos raíz (entidades sin padre).
+2. Cada nodo calcula su matriz local: $S \times R \times T$.
+3. La matriz global se obtiene multiplicando: $MatrizLocal \times MatrizPadre$.
+4. Este flujo asegura que al mover un "Padre", todos sus "Hijos" se desplacen de forma relativa automáticamente.
 
-1. **Awake/Init:** Inicialización de ventana, dispositivo DX11, ImGui y carga de recursos iniciales.
-2. **Update:**
-* Procesamiento de input (Win32/ImGui).
-* Actualización lógica del `SceneGraph` (matrices de mundo).
-* Lógica de componentes (`update`).
+-----
 
+## 📷 Pipeline Gráfico y Recursos
 
-3. **Render:**
-* Limpieza de buffers.
-* Renderizado de la escena 3D (Shaders, Mallas).
-* Renderizado de la GUI (Capas de ImGui sobre la escena).
-* Presentación (SwapChain).
+| Recurso | Clase Wrapper | Descripción |
+|---|---|---|
+| **Dispositivo** | `Device` / `DeviceContext` | Abstracción de la creación de recursos y envío de comandos a la GPU. |
+| **Buffers** | `Buffer` | Clase genérica para manejar Vertex, Index y Constant Buffers. |
+| **Texturas** | `Texture` | Carga de imágenes (DDS, PNG, JPG) y creación de Render Targets. |
+| **Shaders** | `ShaderProgram` | Compilación y vinculación de Vertex Shader, Pixel Shader e Input Layout. |
+| **Recursos** | `ResourceManager` | Caché global que garantiza que un modelo o textura se cargue solo una vez. |
 
+-----
 
-4. **Destroy:** Liberación segura de memoria y punteros COM (`SAFE_RELEASE`).
+## 🚀 Flujo de Ejecución (Ciclo de Vida)
 
-## 📚 Dependencias
+1. **`awake()`**: Configuración inicial de logs y parámetros de ventana.
+2. **`init()`**: 
+   - Inicialización de DirectX 11 y el contexto de ImGui.
+   - Carga de modelos mediante `ResourceManager` e instanciación de `Actors`.
+   - Vinculación de jerarquías en el `SceneGraph`.
+3. **`update()`**:
+   - Procesamiento de Input de usuario y cámara FPS.
+   - `SceneGraph::update()`: Recálculo recursivo de matrices de mundo.
+   - Actualización de lógica de componentes.
+4. **`render()`**:
+   - Limpieza de Buffers (RTV/DSV).
+   - `SceneGraph::render()`: Dibujo de entidades registradas.
+   - `renderGUI()`: Dibujo de paneles de ImGui y Gizmos.
+   - `SwapChain::present()`: Intercambio de buffers de imagen.
 
-* **DirectX 11 SDK:** API gráfica principal.
-* **DirectX Math (xnamath/DirectXMath):** Operaciones vectoriales y matriciales.
-* **Dear ImGui:** Biblioteca para la interfaz gráfica de usuario.
-* **ImGuizmo:** Extensiones de ImGui para manipuladores 3D.
-* **Autodesk FBX SDK:** Para la importación de archivos de modelos 3D.
+-----
 
-## 🎮 Controles (Cámara de Editor)
+## 🎨 Herramientas del Editor (GUI)
 
-* **W, A, S, D:** Movimiento de la cámara (Adelante, Izquierda, Atrás, Derecha).
-* **Mouse:** Rotación de la vista (Yaw/Pitch).
-* **Gizmos:**
-* `W`: Modo Traslación.
-* `E`: Modo Rotación.
-* `R`: Modo Escala.
+El motor integra un editor profesional para facilitar el desarrollo:
+* **Inspector Panel:** Permite modificar valores numéricos de `Transform` y propiedades del `Actor` en tiempo real.
+* **Hierarchy Panel (Outliner):** Vista de árbol para organizar y seleccionar objetos de la escena.
+* **Gizmos (ImGuizmo):** Manipuladores visuales para Traslación (**W**), Rotación (**E**) y Escala (**R**).
+* **Tema Visual:** Estilo personalizado "Monaco Dark" con bordes redondeados y paleta de grises profesionales.
+
+-----
+
+## 📊 Diagrama UML
+
+Este diagrama representa la estructura de clases actual y cómo interactúan los componentes ECS con el sistema de renderizado.
+
+```mermaid
+classDiagram
+    class BaseApp {
+        -Window m_window
+        -Device m_device
+        -SceneGraph m_sceneGraph
+        -GUI m_gui
+        +init()
+        +update()
+        +render()
+    }
+
+    class Entity {
+        <<Abstract>>
+        #vector~Component*~ m_components
+        +addComponent()
+        +getComponent()
+    }
+
+    class Actor {
+        -string m_name
+        +renderShadow()
+    }
+
+    class Component {
+        <<Interface>>
+        +init()*
+        +update()*
+        +render()*
+    }
+
+    class Transform {
+        +Vector3 position
+        +Vector3 rotation
+        +Vector3 scale
+        +Matrix matrix
+    }
+
+    class MeshComponent {
+        +vector~Vertex~ m_vertex
+        +vector~uint~ m_index
+    }
+
+    class SceneGraph {
+        -vector~Entity*~ m_entities
+        +attach(child, parent)
+        +updateWorldRecursive()
+    }
+
+    BaseApp --> SceneGraph
+    BaseApp --> GUI
+    SceneGraph --> Entity
+    Entity <|-- Actor
+    Entity "1" *-- "many" Component
+    Component <|-- Transform
+    Component <|-- MeshComponent
+    Component <|-- HierarchyComponent
+    Actor --> ResourceManager : requests assets
