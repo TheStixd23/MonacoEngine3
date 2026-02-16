@@ -13,7 +13,6 @@ class DeviceContext;
  * - Texturas creadas en memoria (RTV, DSV, UAV).
  * - Copias a partir de otra textura.
  *
- * Proporciona m?todos para inicializaci?n, actualizaci?n, uso en shaders y destrucci?n.
  */
 class 
 Texture {

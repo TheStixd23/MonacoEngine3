@@ -104,31 +104,31 @@ HRESULT BaseApp::init() {
         "Skybox/cubemap_5.png"
     };
     m_skyboxTex.CreateCubemap(m_device, m_deviceContext, faces, true);
-    // Set PrintStream Actor
-    m_PrintStream = EU::MakeShared<Actor>(m_device);
-    if (!m_PrintStream.isNull()) {
-        std::vector<MeshComponent> PrintStreamMeshes;
-        m_model = new Model3D("Assets/Desert.fbx", ModelType::FBX);
-        PrintStreamMeshes = m_model->GetMeshes();
-        std::vector<Texture> PrintStreamTextures;
-        hr = m_PrintStreamAlbedo.init(m_device, "Assets/Text", ExtensionType::PNG);
+    // Set Espada Actor
+    m_Espada = EU::MakeShared<Actor>(m_device);
+    if (!m_Espada.isNull()) {
+        std::vector<MeshComponent> EspadaMeshes;
+        m_model = new Model3D("Assets/AnyConv.com__Espada.fbx", ModelType::FBX);
+        EspadaMeshes = m_model->GetMeshes();
+        std::vector<Texture> EspadaTextures;
+        hr = m_EspadaAlbedo.init(m_device, "Assets/basecolor", ExtensionType::DDS);
         if (FAILED(hr)) {
-            ERROR("Main", "InitDevice", ("Failed to initialize PrintStreamAlbedo. HRESULT: " + std::to_string(hr)).c_str());
+            ERROR("Main", "InitDevice", ("Failed to initialize EspadaAlbedo. HRESULT: " + std::to_string(hr)).c_str());
             return hr;
         }
-        PrintStreamTextures.push_back(m_PrintStreamAlbedo);
-        m_PrintStream->setMesh(m_device, PrintStreamMeshes);
-        m_PrintStream->setTextures(PrintStreamTextures);
-        m_PrintStream->setName("PrintStream");
-        m_actors.push_back(m_PrintStream);
-        m_PrintStream->getComponent<Transform>()->setTransform(
+        EspadaTextures.push_back(m_EspadaAlbedo);
+        m_Espada->setMesh(m_device, EspadaMeshes);
+        m_Espada->setTextures(EspadaTextures);
+        m_Espada->setName("Espada");
+        m_actors.push_back(m_Espada);
+        m_Espada->getComponent<Transform>()->setTransform(
             EU::Vector3(2.0f, -4.90f, 11.60f),
             EU::Vector3(-0.60f, 3.0f, -0.20f),
             EU::Vector3(1.0f, 1.0f, 1.0f)
         );
     }
     else {
-        ERROR("Main", "InitDevice", "Failed to create PrintStream Actor.");
+        ERROR("Main", "InitDevice", "Failed to create Espada Actor.");
         return E_FAIL;
     }
     // Store the Actors in the Scene Graph

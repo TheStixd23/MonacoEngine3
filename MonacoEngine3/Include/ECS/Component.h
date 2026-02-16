@@ -1,60 +1,71 @@
 #pragma once
 #include "Prerequisites.h"
+
+// Pre-declaración
 class DeviceContext;
 
 /**
  * @class Component
- * @brief Clase base abstracta para todos los componentes del juego.
+ * @brief Clase base abstracta que define la interfaz para todos los componentes de una entidad.
  *
- * La clase Component define la interfaz básica que todos los componentes deben implementar,
- * permitiendo actualizar y renderizar el componente, así como obtener su tipo.
+ * En la arquitectura ECS (Entity-Component-System) o similar, esta clase actúa como el contrato
+ * que deben cumplir todos los componentes adjuntos a un @ref Actor o Entidad.
+ * Proporciona el ciclo de vida básico: inicialización, actualización, renderizado y destrucción.
  */
-class 
-Component {
+class Component {
 public:
-  /**
-   * @brief Constructor por defecto.
-   */
-  Component() = default;
+    /**
+     * @brief Constructor por defecto.
+     * Inicializa un componente sin tipo específico.
+     */
+    Component() = default;
 
-  /**
-   * @brief Constructor con tipo de componente.
-   * @param type Tipo del componente.
-   */
-  Component(const ComponentType type) : m_type(type) {}
+    /**
+     * @brief Constructor de inicialización con tipo.
+     * @param type Enumerador @ref ComponentType que identifica la naturaleza del componente (ej. Mesh, Transform).
+     */
+    Component(const ComponentType type) : m_type(type) {}
 
-  /**
-   * @brief Destructor virtual.
-   */
-  virtual
-  ~Component() = default;
+    /**
+     * @brief Destructor virtual.
+     * Necesario para asegurar que los destructores de las clases derivadas se invoquen correctamente.
+     */
+    virtual ~Component() = default;
 
-  virtual void
-  init() = 0;
+    /**
+     * @brief Inicializa el componente.
+     * * Método virtual puro que debe ser implementado por las clases derivadas para configurar
+     * estados iniciales o recursos dependientes después de la construcción.
+     */
+    virtual void init() = 0;
 
-  /**
-   * @brief Método virtual puro para actualizar el componente.
-   * @param deltaTime El tiempo transcurrido desde la última actualización.
-   */
-  virtual void 
-  update(float deltaTime) = 0;
+    /**
+     * @brief Actualiza la lógica del componente.
+     * * Se llama una vez por fotograma. Implementa el comportamiento dinámico del componente.
+     * @param deltaTime Tiempo transcurrido (en segundos) desde el último frame.
+     */
+    virtual void update(float deltaTime) = 0;
 
-  /**
-   * @brief Método virtual puro para renderizar el componente.
-   * @param deviceContext Contexto del dispositivo para operaciones gráficas.
-   */
-  virtual void 
-  render(DeviceContext& deviceContext) = 0;
+    /**
+     * @brief Renderiza el componente.
+     * * Se llama durante la fase de dibujo. Permite al componente enviar comandos al pipeline gráfico.
+     * @param deviceContext Contexto del dispositivo gráfico para realizar operaciones de dibujo.
+     */
+    virtual void render(DeviceContext& deviceContext) = 0;
 
-  virtual void
-  destroy() = 0;
+    /**
+     * @brief Libera los recursos del componente.
+     * * Método virtual puro para limpiar memoria, buffers o referencias antes de la destrucción del objeto.
+     */
+    virtual void destroy() = 0;
 
-  /**
-   * @brief Obtiene el tipo del componente.
-   * @return El tipo del componente.
-   */
-  ComponentType 
-  getType() const { return m_type; }
+    /**
+     * @brief Obtiene el identificador de tipo del componente.
+     * @return Valor del enumerado @ref ComponentType que corresponde a este componente.
+     */
+    ComponentType getType() const { return m_type; }
+
 protected:
-  ComponentType m_type; ///< Tipo del componente.
+    /** @brief Identificador del tipo de componente, usado para casting seguro y lógica específica. */
+    ComponentType m_type;
 };

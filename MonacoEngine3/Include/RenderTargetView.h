@@ -1,7 +1,6 @@
 #pragma once
 #include "Prerequisites.h"
 
-// Declaraciones adelantadas de clases
 class Device;
 class DeviceContext;
 class Texture;

@@ -2,7 +2,6 @@
 
 #include "Prerequisites.h"
 
-// Declaraciones adelantadas (Forward Declarations)
 class Device;
 class DeviceContext;
 

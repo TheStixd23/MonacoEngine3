@@ -9,7 +9,6 @@
 
 #include "Prerequisites.h"
 
- // Declaraciones adelantadas (Forward Declarations) para evitar inclusiones innecesarias
 class Device;
 class DeviceContext;
 

@@ -3,7 +3,6 @@
 #include "Prerequisites.h"
 #include "InputLayout.h"
 
-// Declaraciones adelantadas (Forward Declarations)
 class Device;
 class DeviceContext;
 

@@ -9,7 +9,6 @@
 
 #include "Prerequisites.h"
 
- // Declaraciones adelantadas (Forward Declarations)
 class
 	Window;
 
