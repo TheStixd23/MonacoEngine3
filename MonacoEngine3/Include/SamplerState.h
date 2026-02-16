@@ -51,8 +51,8 @@ public:
 	 */
 	void
 		render(DeviceContext& deviceContext,
-			unsigned int StartSlot,
-			unsigned int NumSamplers);
+				unsigned int StartSlot,
+				unsigned int NumSamplers);
 
 	/**
 	 * @brief Limpia y libera el recurso ID3D11SamplerState de DirectX.

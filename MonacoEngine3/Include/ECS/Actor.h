@@ -7,7 +7,6 @@
 #include "SamplerState.h"
 #include "ShaderProgram.h"
 
-// Pre-declaraciones para evitar dependencias circulares y acelerar compilación
 class Device;
 class DeviceContext;
 class MeshComponent;

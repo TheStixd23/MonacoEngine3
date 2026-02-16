@@ -45,8 +45,8 @@ public:
 	 */
 	HRESULT
 		init(Device& device,
-			           std::vector<D3D11_INPUT_ELEMENT_DESC>& Layout,
-			           ID3DBlob* VertexShaderData);
+			 std::vector<D3D11_INPUT_ELEMENT_DESC>& Layout,
+			 ID3DBlob* VertexShaderData);
 
 	/**
 	 * @brief Lógica de actualización del layout (generalmente vacía para un layout estático).
